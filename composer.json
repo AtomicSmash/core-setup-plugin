@@ -1,0 +1,5 @@
+{
+	"name": "atomicsmash/core-setup",
+	"description": "This is the shared config used on each of our sites.",
+	"type": "wordpress-plugin"
+}

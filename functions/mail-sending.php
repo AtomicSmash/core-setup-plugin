@@ -1,0 +1,40 @@
+<?php
+/**
+ * Mail sending
+ */
+
+namespace AtomicSmash\CoreSetup\Mail;
+
+if ( wp_get_environment_type() !== 'production' ) {
+	/**
+	 * Block emails on any non-production environment.
+	 *
+	 * @param \PHPMailer\PHPMailer\PHPMailer $phpmailer The class that makes PHP's mail() function work.
+	 */
+	function mailtrap( \PHPMailer\PHPMailer\PHPMailer $phpmailer ): void {
+		if ( defined( 'MAILTRAP_USERNAME' ) && defined( 'MAILTRAP_PASSWORD' ) ) {
+			// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+			$phpmailer->isSMTP();
+			$phpmailer->Host = 'sandbox.smtp.mailtrap.io';
+			$phpmailer->SMTPAuth = true;
+			$phpmailer->Port = 2525;
+			$phpmailer->Username = \MAILTRAP_USERNAME;
+			$phpmailer->Password = \MAILTRAP_PASSWORD;
+		}
+	}
+	add_action( 'phpmailer_init', __NAMESPACE__ . '\\mailtrap' );
+
+	/**
+	 * Automatically disable plugins which may interfere with mailtrap.
+	 */
+	function deactivate_mail_sending_plugins(): void {
+		$mail_sending_plugins = array(
+			'wp-mail-smtp/wp_mail_smtp.php',
+		);
+		foreach ( $mail_sending_plugins as $mail_sending_plugin ) {
+			if ( is_plugin_active( $mail_sending_plugin ) ) {
+				deactivate_plugins( $mail_sending_plugin );
+			}
+		}
+	}
+}
